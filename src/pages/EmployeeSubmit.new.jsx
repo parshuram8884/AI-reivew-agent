@@ -33,15 +33,7 @@ function EmployeeSubmit() {
     const [errors, setErrors] = useState({})
     const [submitError, setSubmitError] = useState('')
 
-
-console.log(Params)
-console.log("TOKEN:", token)
-
-
- useEffect(() => {
-    console.log("Current URL:", window.location.pathname)
-    console.log("Token:", token)
-     
+    useEffect(() => {
         const loadAgent = async () => {
             try {
                 const { data, error } = await supabase
