@@ -34,11 +34,11 @@ function EmployeeSubmit() {
     const [submitError, setSubmitError] = useState('')
 
 
-    const params = useParams()
+    
 
 console.log("FULL PARAMS:", params)
 
-const token = params.agentId
+
 
 console.log("TOKEN:", token)
 
