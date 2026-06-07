@@ -36,11 +36,7 @@ function EmployeeSubmit() {
 
     
 
-console.log("FULL PARAMS:", params)
 
-
-
-console.log("TOKEN:", token)
 
   useEffect(() => {
     console.log("Current URL:", window.location.pathname)
