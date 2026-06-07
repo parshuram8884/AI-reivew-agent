@@ -33,49 +33,47 @@ function EmployeeSubmit() {
     const [errors, setErrors] = useState({})
     const [submitError, setSubmitError] = useState('')
 
-    useEffect(() => {
-        const loadAgent = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('agents')
-                    .select('name, description, category, instructions, criteria, threshold, model, share_token')
-                    .eq('share_token', token)
-                    .single()
+   useEffect(() => {
+    const loadAgent = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('agents')
+                .select('*')
+                .eq('share_token', token)
+                .single()
 
-                if (error) {
-                    console.warn('Supabase returned an error when loading agent:', error)
-                }
-
-                if (data) {
-                    const loadedAgent = {
-                        name: data.name,
-                        description: data.description,
-                        category: data.category,
-                        instructions: data.instructions,
-                        criteria: Array.isArray(data.criteria) ? data.criteria : [],
-                        threshold: data.threshold || 75,
-                        model: data.model || 'gemini-flash',
-                        shareToken: data.share_token || token,
-                    }
-                    setAgent(loadedAgent)
-
-                    const existing = JSON.parse(sessionStorage.getItem('rb_agents') || '[]')
-                    if (!existing.find(a => a.shareToken === loadedAgent.shareToken)) {
-                        sessionStorage.setItem('rb_agents', JSON.stringify([...existing, loadedAgent]))
-                    }
-                    return
-                }
-            } catch (err) {
-                console.warn('Supabase lookup failed, falling back to local session:', err)
+            if (!error && data) {
+                setAgent({
+                    name: data.name,
+                    description: data.description,
+                    category: data.category,
+                    instructions: data.instructions,
+                    criteria: data.criteria || [],
+                    threshold: data.threshold || 75,
+                    model: data.model || 'gemini-2.5-flash',
+                    shareToken: data.share_token,
+                })
+                return
             }
-
-            const agents = JSON.parse(sessionStorage.getItem('rb_agents') || '[]')
-            const found = agents.find(a => a.shareToken === token)
-            setAgent(found)
+        } catch (err) {
+            console.error(err)
         }
 
-        loadAgent()
-    }, [token])
+        const agents =
+            JSON.parse(sessionStorage.getItem('rb_agents') || '[]')
+
+        const found =
+            agents.find(a => a.shareToken === token)
+
+        if (found) {
+            setAgent(found)
+        } else {
+            setAgent(false)
+        }
+    }
+
+    loadAgent()
+}, [token])
 
     const update = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }))
