@@ -16,7 +16,7 @@ function AppRoutes() {
                 <Route path='/signup' element={<Signup />} />
                 <Route path='/dashboard' element={<Dashboard />} />
                 <Route path='/create-agent' element={<CreateAgent />} />
-                <Route path='/submit/:agentId' element={<EmployeeSubmit />} />
+                <Route path="/submit/:token" element={<EmployeeSubmit />} />
                 <Route path='/submissions' element={<SubmissionsDatabase />} />
             </Routes>
         </BrowserRouter>
