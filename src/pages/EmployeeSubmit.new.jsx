@@ -34,53 +34,56 @@ function EmployeeSubmit() {
     const [submitError, setSubmitError] = useState('')
 
 
-    
+console.log(Params)
+console.log("TOKEN:", token)
 
 
-
-  useEffect(() => {
+ useEffect(() => {
     console.log("Current URL:", window.location.pathname)
     console.log("Token:", token)
+     
+        const loadAgent = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('agents')
+                    .select('name, description, category, instructions, criteria, threshold, model, share_token')
+                    .eq('share_token', token)
+                    .single()
 
-    if (!token) {
-        console.error("No token found in URL")
-        setAgent(false)
-        return
-    }
+                if (error) {
+                    console.warn('Supabase returned an error when loading agent:', error)
+                }
 
-    const loadAgent = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('agents')
-                .select('*')
-                .eq('share_token', token)
-                .single()
+                if (data) {
+                    const loadedAgent = {
+                        name: data.name,
+                        description: data.description,
+                        category: data.category,
+                        instructions: data.instructions,
+                        criteria: Array.isArray(data.criteria) ? data.criteria : [],
+                        threshold: data.threshold || 75,
+                        model: data.model || 'gemini-flash',
+                        shareToken: data.share_token || token,
+                    }
+                    setAgent(loadedAgent)
 
-            console.log("Supabase response:", data, error)
-
-            if (data) {
-                setAgent({
-                    name: data.name,
-                    description: data.description,
-                    category: data.category,
-                    instructions: data.instructions,
-                    criteria: data.criteria || [],
-                    threshold: data.threshold || 75,
-                    model: data.model || 'gemini-2.5-flash',
-                    shareToken: data.share_token,
-                })
-                return
+                    const existing = JSON.parse(sessionStorage.getItem('rb_agents') || '[]')
+                    if (!existing.find(a => a.shareToken === loadedAgent.shareToken)) {
+                        sessionStorage.setItem('rb_agents', JSON.stringify([...existing, loadedAgent]))
+                    }
+                    return
+                }
+            } catch (err) {
+                console.warn('Supabase lookup failed, falling back to local session:', err)
             }
 
-            setAgent(false)
-        } catch (err) {
-            console.error(err)
-            setAgent(false)
+            const agents = JSON.parse(sessionStorage.getItem('rb_agents') || '[]')
+            const found = agents.find(a => a.shareToken === token)
+            setAgent(found)
         }
-    }
 
-    loadAgent()
-}, [token])
+        loadAgent()
+    }, [token])
 
     const update = (field, value) => {
         setForm(prev => ({ ...prev, [field]: value }))
